@@ -33,7 +33,6 @@ for i in range(args.repeats):
     sys.stderr.write("Sending password "+str(i+1)+": "+str(args.size)+" bytes\n")
     try:
         http_client.fetch(req)
-        #http_client.fetch("http://vagrant2016.dev/hacklogin.php", callback)
         sleep(args.delay)
     except Exception as e:
         sys.stderr.write("Error: " + str(e))
@@ -41,8 +40,10 @@ for i in range(args.repeats):
 http_client.close()
 sys.exit()
 
+'''
 def callback(response):
     if response.error:
         sys.stderr.write("Error: " + response.error)
     else:
         sys.stderr.write(response.body)
+'''
