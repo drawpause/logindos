@@ -12,6 +12,7 @@ parser.add_argument('-r','--repeats', dest='repeats', type=int, default=20, help
 
 args = parser.parse_args()
 
+# @todo Make this asynchronous
 #http_client = tornado.httpclient.AsyncHTTPClient()
 http_client = tornado.httpclient.HTTPClient()
 sys.stderr.write("Generating password...\n")
