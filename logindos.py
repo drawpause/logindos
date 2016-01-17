@@ -70,12 +70,23 @@ def response_callback(duration, count):
     # @todo Make this multiline
     sys.stdout.write("\r" + str(round((count / args.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
 
+def clear():
+    """
+    Clear screen, return cursor to top left
+    """
+    sys.stdout.write('\033[2J')
+    sys.stdout.write('\033[H')
+    sys.stdout.flush()
+
 def main():
     """
     Main program
 
     @return:
     """
+
+    # Clear the screen
+    clear()
 
     # Generate password
     # @todo Generate the password from random characters
