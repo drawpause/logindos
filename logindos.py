@@ -68,7 +68,7 @@ def response_callback(duration, count):
     @return:
     """
     # @todo Make this multiline
-    sys.stderr.write("\r" + str(round((count / args.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
+    sys.stdout.write("\r" + str(round((count / args.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
 
 def main():
     """
@@ -79,9 +79,9 @@ def main():
 
     # Generate password
     # @todo Generate the password from random characters
-    sys.stderr.write("Generating password...\n")
+    sys.stdout.write("Generating password...\n")
     password = "x" * args.size
-    sys.stderr.write("Done!\n")
+    sys.stdout.write("Done!\n")
 
     # Set the POST payload
     # @todo Add POST variables from the command line argument, ie. --variables username,email,login
@@ -93,7 +93,7 @@ def main():
 
     # Print the summary of the assigment
     # @todo Add url and ask for comfirmation
-    sys.stderr.write("Sending " + str(args.repeats) + " passwords sized " + filesize.size(args.size) + " in every " + str(args.delay) + " seconds.\n")
+    sys.stdout.write("Sending " + str(args.repeats) + " passwords sized " + filesize.size(args.size) + " in every " + str(args.delay) + " seconds.\n")
 
     # Add requests to the task list
     for i in range(args.repeats):
