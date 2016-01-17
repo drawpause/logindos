@@ -73,27 +73,11 @@ class Longpass:
         # Request response time
         duration = time.time() - start
 
-        # Display the progress using this callback
-
+        # Display the progress
         sys.stdout.write("\r" + str(round((self.iterations / self.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
-        #self.__response_callback(duration)
 
         # Close the connection
         response.close()
 
         # Wait for a given time
         asyncio.sleep(self.delay)
-
-    def __response_callback(self, duration):
-        """
-        Prints the progress meter in stdout
-
-        @type duration: float
-        @param duration:
-        @type count: int
-        @param count: A number of iterations
-        @rtype: None
-        @return:
-        """
-        # @todo Make this multiline
-        sys.stdout.write("\r" + str(round((self.iterations / self.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
