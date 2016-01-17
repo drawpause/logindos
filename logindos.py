@@ -67,7 +67,7 @@ def response_callback(duration, count):
     @rtype: None
     @return:
     """
-
+    # @todo Make this multiline
     sys.stderr.write("\r" + str(round((count / args.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
 
 def main():
