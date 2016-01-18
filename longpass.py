@@ -34,7 +34,7 @@ class Longpass:
         # Add requests to the task list
         for i in range(self.repeats):
             delay = i * self.delay
-            self.updateUI((i+4), "Request " + str(i+1) + " waiting...")
+            self.updateUI((i+4), "Request " + str(i+1) + ": Scheduled...")
             self.tasks.append(self.makeRequest(delay, i))
 
         # Event loop that waits for tasks to complete
@@ -105,9 +105,9 @@ class Longpass:
         # Queue up
         await asyncio.sleep(delay)
 
+        id = "Request " + str(i+1)
 
-
-        self.updateUI(position, "Sending request...")
+        self.updateUI(position, id + ": Sending request...")
 
         # Add to iteration counter
         self.progress(1)
@@ -130,7 +130,7 @@ class Longpass:
         #self.printStatus(duration)
 
         #self.updateUI(3, str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
-        self.updateUI(position, "Request " + str(i+1) + " done, server response time " + str(round(duration, 2)) + " seconds.")
+        self.updateUI(position, id + ": Done, server response time " + str(round(duration, 2)) + " seconds.")
 
         # Close the connection
         response.close()
