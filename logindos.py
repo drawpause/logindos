@@ -29,7 +29,7 @@ def main():
     login.payload = dict(parse_qsl(args.variables.replace(',', '&')))
 
     # Print the summary of the assigment
-    # @todo Add url and ask for comfirmation
+    # @todo Add url and ask for confirmation
     login.updateUI(0, "Sending " + str(login.repeats) + " passwords sized " + filesize.size(login.size) + " in every " + str(login.delay) + " seconds.")
 
     login.run()
