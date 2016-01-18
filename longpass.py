@@ -20,8 +20,10 @@ class Longpass:
 
     def run(self):
 
+
+        self.updateUI(2, "Generating password...")
         password = self.generatePassword(self.size)
-        sys.stdout.write("Done!\n")
+        self.updateUI(2, "Done!")
 
         # Set the POST payload
         # @todo Add POST variables from the command line argument, ie. --variables username=john,email=user@domain.com
@@ -32,7 +34,8 @@ class Longpass:
         # Add requests to the task list
         for i in range(self.repeats):
             delay = i * self.delay
-            self.tasks.append(self.makeRequest(delay))
+            self.updateUI((i+4), "Request " + str(i+1) + " waiting...")
+            self.tasks.append(self.makeRequest(delay, i))
 
         # Event loop that waits for tasks to complete
         loop = asyncio.get_event_loop()
@@ -54,7 +57,6 @@ class Longpass:
     def generatePassword(self, size):
         # Generate password
         # @todo Generate the password from random characters
-        sys.stdout.write("Generating password...\n")
         return "x" * size
 
     def clear(self):
@@ -63,22 +65,52 @@ class Longpass:
         sys.stdout.write('\033[H')
         sys.stdout.flush()
 
-    def printStatus(self, duration):
-        #self.clear()
-        sys.stdout.write("" + str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
+    def updateUI(self, position, txt):
+        # EAFP
+        try:
+            self.ui[position] = txt
+        except IndexError:
+            self.ui.insert(position, txt)
+
+        #progress = str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done"
+        progress = "Mister"
+
+        '''
+        try:
+            self.ui[16] = progress
+        except IndexError:
+            self.ui.insert(16, progress)
+        '''
+        self.clear()
+        for msg in self.ui:
+            sys.stdout.write(msg + "\n")
+        #sys.stdout.write("" + str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
         #sys.stdout.write("Server response time " + str(round(duration, 2)) + " seconds.")
 
-    async def makeRequest(self, delay):
+    def progress(self,step):
+        self.iterations += step
+        progress = "\n" + str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done"
+        self.updateUI(self.repeats + 3, progress)
+
+    async def makeRequest(self, delay, i):
         """
         Make an asynchronous POST request
         """
+
+
+        position = 3 + i
+
+        #self.updateUI(position, "Request " + str(i+1) + " waiting...")
+
         # Queue up
         await asyncio.sleep(delay)
 
-        sys.stdout.write("Starting task with delay " + str(delay) + "\n")
+
+
+        self.updateUI(position, "Sending request...")
 
         # Add to iteration counter
-        self.iterations += 1
+        self.progress(1)
 
         #self.printStatus(0)
 
@@ -89,13 +121,16 @@ class Longpass:
         response = await aiohttp.post(self.url, data = self.payload)
 
         # Add to iteration counter
-        self.iterations += 1
+        self.progress(1)
 
         # Request response time
         duration = time.time() - start
 
         # Display the progress
-        self.printStatus(duration)
+        #self.printStatus(duration)
+
+        #self.updateUI(3, str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
+        self.updateUI(position, "Request " + str(i+1) + " done, server response time " + str(round(duration, 2)) + " seconds.")
 
         # Close the connection
         response.close()

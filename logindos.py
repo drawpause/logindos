@@ -29,7 +29,7 @@ def main():
 
     # Print the summary of the assigment
     # @todo Add url and ask for comfirmation
-    sys.stdout.write("Sending " + str(login.repeats) + " passwords sized " + filesize.size(login.size) + " in every " + str(login.delay) + " seconds.\n")
+    login.updateUI(0, "Sending " + str(login.repeats) + " passwords sized " + filesize.size(login.size) + " in every " + str(login.delay) + " seconds.")
 
     login.run()
 
