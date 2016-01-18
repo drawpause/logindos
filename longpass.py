@@ -53,10 +53,6 @@ class Longpass:
         # Close the loop
         loop.close()
 
-
-    def bold(self, msg):
-        return u'\033[1m%s\033[0m' % msg
-
     def generatePassword(self, size):
         # Generate password
         return "".join(choice(ascii_letters) for i in range(size))
