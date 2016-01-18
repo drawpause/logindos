@@ -36,14 +36,14 @@ class Longpass:
         #self.updateUI(0, password) # debug
         password = None
 
+        # Event loop that waits for tasks to complete
+        loop = asyncio.get_event_loop()
+
         # Add requests to the task list
         for i in range(self.repeats):
             delay = i * self.delay
             self.updateUI((i+4), colored("Request " + str(i+1) + ": Scheduled...", 'grey'))
-            self.tasks.append(self.makeRequest(delay, i))
-
-        # Event loop that waits for tasks to complete
-        loop = asyncio.get_event_loop()
+            self.tasks.append(self.makeRequest(delay, i, loop))
 
         # Run the loop until every task is complete
         loop.run_until_complete(asyncio.wait(self.tasks))
@@ -94,7 +94,7 @@ class Longpass:
         progress = percentage + response
         self.updateUI(self.repeats + 3, progress)
 
-    async def makeRequest(self, delay, i):
+    async def makeRequest(self, delay, i, loop):
         """
         Make an asynchronous POST request
         """
@@ -113,13 +113,15 @@ class Longpass:
         # Add to iteration counter
         self.progress(1)
 
-        #self.printStatus(0)
-
         # Measure time
         start = time.time()
 
         # The actual request
-        response = await aiohttp.post(self.url, data = self.payload)
+        try:
+            response = await aiohttp.post(self.url, data = self.payload)
+        except Exception as e:
+            self.clear()
+            exit(colored(e, 'red'))
 
         # Response debug
         #self.updateUI(50, await response.text())
